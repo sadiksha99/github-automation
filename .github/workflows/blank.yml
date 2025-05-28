@@ -6,9 +6,9 @@ name: My First Workflow
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "01_DockerTest" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "01_DockerTest" ]
+    branches: [ "main" ]
 
 
   # Allows you to run this workflow manually from the Actions tab
