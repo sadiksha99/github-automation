@@ -6,9 +6,10 @@ name: My First Workflow
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
+    branches: [ "01_DockerTest" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "01_DockerTest" ]
+
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -34,3 +35,14 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+
+      # Build the Docker image with the hello-world-nginx:v1 tag
+      - name: Build Docker image
+        run: docker build -t hello-world-nginx:v1 .
+
+      # Run the Docker container and map port 8080 to 80
+      - name: Run Docker container
+        run: |
+          docker run -d -p 8080:80 --name my-nginx hello-world-nginx:v1
+          sleep 5
+          curl -I http://localhost:8080
