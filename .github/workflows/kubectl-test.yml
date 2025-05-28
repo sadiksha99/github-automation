@@ -1,4 +1,4 @@
-name: Kubectl Pod Deployment
+name: Simple Windows Pod Deployment
 
 on:
   workflow_dispatch:
@@ -10,45 +10,33 @@ jobs:
     runs-on: self-hosted
 
     env:
-      NAMESPACE: default  # Replace this if you have a custom namespace
+      NAMESPACE: default
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout code
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      # Step 2: Generate a random pod ID (Windows PowerShell compatible)
-      - name: Generate random pod ID
-        id: vars
-        shell: pwsh
+      - name: Generate pod.yaml with random name (Windows)
+        shell: powershell
         run: |
-          $ID = -join ((48..57) + (97..102) | Get-Random -Count 8 | ForEach-Object {[char]$_})
-          "ID=$ID" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "::set-output name=podname::mypod-$ID"
-
-      # Step 3: Create the pod.yaml with the random name
-      - name: Create pod YAML
-        shell: pwsh
-        run: |
-          $podName = "${{ steps.vars.outputs.podname }}"
+          $ID = -join ((48..57) + (97..102) | Get-Random -Count 6 | ForEach-Object {[char]$_})
+          $POD_NAME = "mypod-$ID"
           @"
-          apiVersion: v1
-          kind: Pod
-          metadata:
-            name: $podName
-            namespace: ${env:NAMESPACE}
-            labels:
-              name: mypod
-          spec:
-            containers:
-            - name: mypod
-              image: rancher/hello-world
-          "@ | Out-File -FilePath pod.yaml -Encoding utf8
+apiVersion: v1
+kind: Pod
+metadata:
+  name: $POD_NAME
+  namespace: ${env:NAMESPACE}
+  labels:
+    name: mypod
+spec:
+  containers:
+  - name: mypod
+    image: rancher/hello-world
+"@ | Out-File -FilePath pod.yaml -Encoding utf8
 
-      # Step 4: Apply the pod definition to Kubernetes
       - name: Apply to cluster
         run: kubectl apply -f pod.yaml
 
-      # Step 5: List all pods in the namespace
       - name: List Pods
         run: kubectl get pods -n ${NAMESPACE}
