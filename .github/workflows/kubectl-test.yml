@@ -1,42 +1,50 @@
-name: Simple Windows Pod Deployment
+name: Test Kubernetes Access
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Manual trigger
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  deploy-pod:
+  deploy:
+    name: Deploy Hello Pod
     runs-on: self-hosted
 
     env:
-      NAMESPACE: default
+      NAMESPACE: my-namespace
 
     steps:
-      - name: Checkout repo
+      # Checkout your code (if needed)
+      - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Generate pod.yaml with random name (Windows)
-        shell: powershell
-        run: |
-          $ID = -join ((48..57) + (97..102) | Get-Random -Count 6 | ForEach-Object {[char]$_})
-          $POD_NAME = "mypod-$ID"
-          @"
-apiVersion: v1
-kind: Pod
-metadata:
-  name: $POD_NAME
-  namespace: ${env:NAMESPACE}
-  labels:
-    name: mypod
-spec:
-  containers:
-  - name: mypod
-    image: rancher/hello-world
-"@ | Out-File -FilePath pod.yaml -Encoding utf8
+      # Generate a random ID
+      - name: Generate Random ID
+        id: random
+        run: echo "id=$(openssl rand -hex 4)" >> $GITHUB_OUTPUT
 
-      - name: Apply to cluster
+      # Create a Pod YAML file with random name
+      - name: Create Pod YAML
+        run: |
+          cat <<EOF > pod.yaml
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: mypod-${{ steps.random.outputs.id }}
+            namespace: $NAMESPACE
+            labels:
+              name: mypod
+          spec:
+            containers:
+            - name: mypod
+              image: rancher/hello-world
+          EOF
+
+      # Apply the YAML using kubectl
+      - name: Apply Pod YAML
         run: kubectl apply -f pod.yaml
 
-      - name: List Pods
-        run: kubectl get pods -n ${NAMESPACE}
+      # Get the list of pods in the namespace
+      - name: Get Pods
+        run: kubectl get pods -n $NAMESPACE
