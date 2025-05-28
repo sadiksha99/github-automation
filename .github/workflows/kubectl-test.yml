@@ -21,9 +21,9 @@ jobs:
       - name: Generate random pod ID
         id: vars
         run: |
-          ID=$(openssl rand -hex 4)
-          echo "ID=$ID" >> $GITHUB_ENV
-          echo "::set-output name=podname::mypod-$ID"
+         ID=$(openssl rand -hex 4)
+         echo "ID=$ID" >> $GITHUB_ENV
+         echo "::set-output name=podname::mypod-$ID"
 
       # Step 3: Create a pod.yaml file with random pod name
       - name: Create pod YAML
