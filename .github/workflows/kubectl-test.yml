@@ -1,50 +1,12 @@
-name: Test Kubernetes Access
+question: How did you make the name randomised?
+answer: |
+  I generated a random 6-letter string using a PowerShell function in the GitHub Actions workflow.
+  This random string was appended to the pod name in the generated YAML file.
 
-on:
-  workflow_dispatch: # Manual trigger
-  push:
-    branches:
-      - main
+  Example function:
+    $id = -join ((97..122) | Get-Random -Count 6 | ForEach-Object { [char]$_ })
 
-jobs:
-  deploy:
-    name: Deploy Hello Pod
-    runs-on: self-hosted
+  Then used in the pod name like:
+    name: mypod-$id
 
-    env:
-      NAMESPACE: my-namespace
-
-    steps:
-      # Checkout your code (if needed)
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      # Generate a random ID
-      - name: Generate Random ID
-        id: random
-        run: echo "id=$(openssl rand -hex 4)" >> $GITHUB_OUTPUT
-
-      # Create a Pod YAML file with random name
-      - name: Create Pod YAML
-        run: |
-          cat <<EOF > pod.yaml
-          apiVersion: v1
-          kind: Pod
-          metadata:
-            name: mypod-${{ steps.random.outputs.id }}
-            namespace: $NAMESPACE
-            labels:
-              name: mypod
-          spec:
-            containers:
-            - name: mypod
-              image: rancher/hello-world
-          EOF
-
-      # Apply the YAML using kubectl
-      - name: Apply Pod YAML
-        run: kubectl apply -f pod.yaml
-
-      # Get the list of pods in the namespace
-      - name: Get Pods
-        run: kubectl get pods -n $NAMESPACE
+  This ensured each Pod had a unique name like 'mypod-abczxy'.
