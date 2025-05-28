@@ -1,12 +1,11 @@
-question: How did you make the name randomised?
-answer: |
-  I generated a random 6-letter string using a PowerShell function in the GitHub Actions workflow.
-  This random string was appended to the pod name in the generated YAML file.
-
-  Example function:
-    $id = -join ((97..122) | Get-Random -Count 6 | ForEach-Object { [char]$_ })
-
-  Then used in the pod name like:
-    name: mypod-$id
-
-  This ensured each Pod had a unique name like 'mypod-abczxy'.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod-xgtrpl # Random name generated in GitHub Actions
+  namespace: default # Set via script or hardcoded
+  labels:
+    name: mypod
+spec:
+  containers:
+  - name: mypod
+    image: rancher/hello-world
