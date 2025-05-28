@@ -1,13 +1,11 @@
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    name: Test UUID action
-    steps:
-      - name: Set UUID
-        id: generate-uuid
-        uses: filipstefansson/uuid-action@v1
-        with:
-          name: ${{ gihub.sha }}
-      # use the output from the `generate-uuid` step
-      - name: Get the UUID
-        run: echo "UUID is ${{ steps.generate-uuid.outputs.uuid }}"
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: mypod- # Try to make this dynamically generated (random)
+  namespace: test-generator # Enter your namespace here
+  labels:
+    name: mypod
+spec:
+  containers:
+  - name: mypod
+    image: rancher/hello-world
