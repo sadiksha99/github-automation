@@ -1,0 +1,34 @@
+name: Kubernetes Test from GitHub Actions
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Generate pod.yaml with random name
+        run: |
+          $id = -join ((97..122) | Get-Random -Count 6 | % {[char]$_})
+          $namespace = "default"
+
+          @(
+            "apiVersion: v1"
+            "kind: Pod"
+            "metadata:"
+            "  name: mypod-$id"
+            "  namespace: $namespace"
+            "  labels:"
+            "    name: mypod"
+            "spec:"
+            "  containers:"
+            "  - name: mypod"
+            "    image: rancher/hello-world"
+          ) | Set-Content -Encoding UTF8 pod.yaml
+
+      - name: Apply pod to Kubernetes
+        run: kubectl apply -f pod.yaml
+
+      - name: List Pods in default namespace
+        run: kubectl get pods -n default
