@@ -1,0 +1,29 @@
+name: Helm Deployment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Add Bitnami repo
+        run: helm repo add bitnami https://charts.bitnami.com/bitnami
+
+      - name: Update repos
+        run: helm repo update
+
+      - name: Create namespace if not exists
+        run: |
+          kubectl get ns helm-test || kubectl create namespace helm-test
+
+      - name: Install or upgrade NGINX via Helm
+        run: |
+          helm upgrade --install nginx-demo bitnami/nginx \
+            --namespace helm-test \
+            --set service.type=ClusterIP \
+            --set image.tag=1.25.3-debian-11-r0
+
+      - name: Wait and check deployment
+        run: kubectl get pods -n helm-test
